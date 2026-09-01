@@ -1,12 +1,15 @@
 // Вытаскивает данные из HTML-прототипа в public/data/*.json.
 // Прототип держит 923 KB данных прямо в разметке; здесь они уезжают в отдельные файлы,
 // чтобы приложение грузило их по fetch, а не тащило одним куском HTML.
-import { readFileSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const out = resolve(root, 'web/public/data');
+// Каталог не в репозитории — данные генерируемые. В чистом клоне его нужно создать,
+// иначе запись падает с ENOENT (так ломалась сборка на Vercel).
+mkdirSync(out, { recursive: true });
 const html = readFileSync(resolve(root, 'prototype/ПЛАН_ОПЛАТ_с_фильтрами (62).html'), 'utf8');
 
 const jsonBlock = (id) => {
