@@ -7,8 +7,13 @@ function resolveConfig(rootDir = path.resolve(__dirname, '..')) {
     ? path.resolve(process.env.SHARED_DATA_DIR)
     : null;
 
-  const defaultPanelFile = path.join(rootDir, 'index.html');
-  const legacyPanelFile = path.join(rootDir, 'ПЛАН_ОПЛАТ_с_фильтрами (62).html');
+  // Прототип ищем по порядку: корневой index.html (его раздаёт Vercel),
+  // перенесённая копия в prototype/, затем исторический путь в корне.
+  const kandidaty = [
+    path.join(rootDir, 'index.html'),
+    path.join(rootDir, 'prototype', 'ПЛАН_ОПЛАТ_с_фильтрами (62).html'),
+    path.join(rootDir, 'ПЛАН_ОПЛАТ_с_фильтрами (62).html'),
+  ];
 
   return {
     rootDir,
@@ -22,7 +27,7 @@ function resolveConfig(rootDir = path.resolve(__dirname, '..')) {
     importsDir: path.join(dataDir, 'imports'),
     backupsDir: path.join(dataDir, 'backups'),
     backupIntervalHours: Math.max(1, Number(process.env.BACKUP_INTERVAL_HOURS || 24)),
-    panelFile: fs.existsSync(defaultPanelFile) ? defaultPanelFile : legacyPanelFile
+    panelFile: kandidaty.find((f) => fs.existsSync(f)) ?? kandidaty[0]
   };
 }
 
