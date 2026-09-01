@@ -1,10 +1,13 @@
 # Vercel собирает только web/: данные уже лежат в web/public/data,
 # извлечение из источников делается локально командой npm run data.
 # Счета, реестры и документы в билд-контейнер не отправляем.
-istochniki/
-docs/
-prototype/
-assets/
-data/
-tests/
-server/
+#
+# Ведущий слэш обязателен: без него правило матчит каталог на любом уровне,
+# и «data/» вырезало бы web/public/data вместе с данными панели.
+/istochniki/
+/docs/
+/prototype/
+/assets/
+/data/
+/tests/
+/server/
