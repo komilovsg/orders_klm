@@ -1,0 +1,1047 @@
+/* КЛМ · закупки — дизайн-токены.
+   Цвет кодирует материал, не украшает. Лайм — только действие.
+   Категориальная тройка металлов прошла проверку на CVD:
+   худшая пара ΔE 20.0 (протанопия), 24.7 (нормальное зрение). */
+
+:root {
+  --grafit: #1a1d18;
+  --grafit-70: #4a5044;
+  --grafit-40: #878d80;
+  --stan: #eff1e8;
+  --polotno: #f7f8f3;
+  --kant: #dfe1d9;
+
+  /* Металлы — категориальные слоты, порядок фиксирован и не тасуется. */
+  --med: #a85b2a;
+  --alum: #1a6db0;
+  --cink: #7d8b23;
+  --med-svet: #c9743d;
+
+  --lime: #caff28;
+  --srok: #d6371c;
+
+  --shina-h: 6px;
+  --shapka-h: 56px;
+  --relse-w: 208px;
+
+  --display: 'Unbounded', system-ui, sans-serif;
+  --body: 'Inter', system-ui, sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, monospace;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--stan);
+  color: var(--grafit);
+  font: 400 14px/1.45 var(--body);
+  -webkit-font-smoothing: antialiased;
+}
+
+:focus-visible {
+  outline: 2px solid var(--grafit);
+  outline-offset: 2px;
+}
+
+/* ── Каркас ─────────────────────────────────────────────── */
+
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.ekran {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  animation: vyezd 260ms ease both;
+}
+
+.canvas {
+  display: grid;
+  grid-template-columns: var(--relse-w) minmax(0, 1fr);
+  flex: 1;
+  min-height: 0;
+}
+
+@keyframes vyezd {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+/* ── Шапка ──────────────────────────────────────────────── */
+
+.shapka {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  height: var(--shapka-h);
+  padding: 0 20px;
+  background: var(--grafit);
+  color: var(--polotno);
+}
+
+.marka {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  border: 0;
+  padding: 0;
+  background: none;
+  color: inherit;
+  font-family: var(--display);
+  font-size: 15px;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+}
+
+.marka span {
+  font-family: var(--body);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--grafit-40);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Котировки металлов: от них едет вся закупочная цена. */
+.kotirovki {
+  display: flex;
+  gap: 22px;
+  margin-left: auto;
+}
+
+.kotirovka {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.kotirovka-metall {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+
+[data-metall='cu'] {
+  background: var(--med);
+}
+[data-metall='al'] {
+  background: var(--alum);
+}
+[data-metall='zn'] {
+  background: var(--cink);
+}
+
+/* ── Шина: сигнатурный элемент ──────────────────────────── */
+/* Медная шина — изделие компании. Этапы закупки сидят на ней контактами. */
+
+.shina {
+  position: relative;
+  display: flex;
+  overflow-x: auto;
+  background: var(--grafit);
+  padding: 0 20px 14px;
+  scrollbar-width: none;
+}
+
+.shina::-webkit-scrollbar {
+  display: none;
+}
+
+.shina::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: var(--shina-h);
+  background: linear-gradient(180deg, var(--med-svet) 0%, var(--med) 55%, #7d4320 100%);
+}
+
+.kontakt {
+  position: relative;
+  flex: none;
+  padding: 18px 26px 0;
+  border: 0;
+  background: none;
+  color: var(--grafit-40);
+  font: 500 13px/1 var(--body);
+  cursor: pointer;
+}
+
+/* Отвод от шины вниз к подписи этапа. */
+.kontakt::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 2px;
+  height: 12px;
+  background: var(--grafit-70);
+  transform: translateX(-50%);
+  transition: background 180ms ease;
+}
+
+/* Замкнутый контакт. */
+.kontakt::after {
+  content: '';
+  position: absolute;
+  top: 9px;
+  left: 50%;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--grafit-70);
+  transform: translateX(-50%);
+  transition: background 180ms ease, box-shadow 180ms ease;
+}
+
+.kontakt[data-bez-nomera] {
+  margin-right: 10px;
+  padding-right: 20px;
+  border-right: 1px solid var(--grafit-70);
+}
+
+.kontakt:hover {
+  color: var(--polotno);
+}
+
+.kontakt[aria-current='page'] {
+  color: var(--polotno);
+}
+
+.kontakt[aria-current='page']::before {
+  background: var(--lime);
+}
+
+.kontakt[aria-current='page']::after {
+  background: var(--lime);
+  box-shadow: 0 0 0 4px rgb(202 255 40 / 0.18);
+  animation: zamykanie 420ms ease;
+}
+
+@keyframes zamykanie {
+  0% {
+    box-shadow: 0 0 0 0 rgb(202 255 40 / 0.5);
+  }
+  60% {
+    box-shadow: 0 0 0 9px rgb(202 255 40 / 0);
+  }
+  100% {
+    box-shadow: 0 0 0 4px rgb(202 255 40 / 0.18);
+  }
+}
+
+.kontakt-nomer {
+  margin-right: 7px;
+  font-family: var(--mono);
+  color: var(--grafit-40);
+}
+
+.kontakt[aria-current='page'] .kontakt-nomer {
+  color: var(--lime);
+}
+
+/* ── Левый рельс ────────────────────────────────────────── */
+
+.relse {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 18px 12px;
+  border-right: 1px solid var(--kant);
+  background: var(--polotno);
+}
+
+.relse-zagolovok {
+  margin: 0 0 10px 10px;
+  font: 500 10px/1 var(--body);
+  letter-spacing: 0.1em;
+  color: var(--grafit-40);
+  text-transform: uppercase;
+}
+
+.relse-punkt {
+  flex: none;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 7px;
+  background: none;
+  color: var(--grafit-70);
+  font: 500 13px/1.3 var(--body);
+  text-align: left;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 140ms ease, color 140ms ease;
+}
+
+.relse-punkt:hover {
+  background: var(--stan);
+  color: var(--grafit);
+}
+
+.relse-punkt[aria-current='true'] {
+  background: var(--grafit);
+  color: var(--polotno);
+}
+
+/* ── Рабочее поле ───────────────────────────────────────── */
+
+.pole {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0; /* иначе грид-ячейка растёт под контент и подвал уезжает за экран */
+  padding: 22px 24px 22px;
+}
+
+.pole-dashboard {
+  overflow-y: auto;
+  padding-bottom: 28px;
+}
+
+.pole-zagolovok {
+  margin: 0;
+  font: 700 30px/1.05 var(--display);
+  letter-spacing: -0.015em;
+}
+
+.pole-podpis {
+  margin: 6px 0 20px;
+  font-size: 13px;
+  color: var(--grafit-70);
+}
+
+/* ── Герой дашборда ─────────────────────────────────────── */
+
+.geroy {
+  display: flex;
+  align-items: baseline;
+  gap: 20px;
+  padding: 4px 0 24px;
+  border-bottom: 1px solid var(--kant);
+  margin-bottom: 20px;
+}
+
+.geroy-chislo {
+  font: 700 clamp(52px, 9vw, 104px) / 0.9 var(--display);
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
+}
+
+.geroy-podpis {
+  font-size: 14px;
+  line-height: 1.4;
+  color: var(--grafit-70);
+}
+
+/* ── KPI ────────────────────────────────────────────────── */
+
+.kpi-ryad {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.kpi {
+  padding: 13px 15px;
+  border: 1px solid var(--kant);
+  border-radius: 10px;
+  background: var(--polotno);
+}
+
+.kpi-znachenie {
+  font: 500 24px/1.1 var(--mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+.kpi-podpis {
+  margin-top: 5px;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--grafit-40);
+  text-transform: uppercase;
+}
+
+/* ── Виджеты дашборда ───────────────────────────────────── */
+
+.setka-vidzhetov {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  align-items: start;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.vidzhet {
+  padding: 18px 20px 20px;
+  border: 1px solid var(--kant);
+  border-radius: 12px;
+  background: var(--polotno);
+}
+
+.vidzhet-zagolovok {
+  margin: 0;
+  font: 600 14px/1.2 var(--body);
+}
+
+.vidzhet-zagolovok-vtoroy {
+  margin-top: 26px;
+}
+
+.vidzhet-podpis {
+  margin: 4px 0 16px;
+  font-size: 12px;
+  color: var(--grafit-40);
+}
+
+/* Ранжирование: полосы одного цвета — цвет кодирует сущность, не место. */
+.bary {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.bar-stroka {
+  display: grid;
+  grid-template-columns: minmax(90px, 150px) 1fr 56px;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+}
+
+.bar-imya {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--grafit-70);
+}
+
+.bar-doroga {
+  height: 9px;
+  border-radius: 4px;
+  background: var(--stan);
+}
+
+.bar-polosa {
+  display: block;
+  height: 100%;
+  border-radius: 4px;
+  background: var(--med);
+  animation: rost 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  transform-origin: left;
+}
+
+@keyframes rost {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+.bar-znachenie {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+/* Часть от целого на две категории — составная полоса, не круговая диаграмма. */
+.stopka {
+  display: flex;
+  gap: 2px; /* разрыв поверхности между сегментами */
+  height: 13px;
+  margin-bottom: 12px;
+}
+
+.stopka-chast {
+  border-radius: 3px;
+  animation: rost 560ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  transform-origin: left;
+}
+
+.legenda {
+  display: flex;
+  gap: 20px;
+  margin: 0;
+  padding: 0;
+  font-size: 12px;
+  color: var(--grafit-70);
+  list-style: none;
+}
+
+.legenda li {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.legenda b {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--grafit);
+}
+
+.legenda-metka {
+  width: 9px;
+  height: 9px;
+  border-radius: 3px;
+}
+
+.spisok-nomenklatury {
+  margin: 12px 0 0;
+  padding: 0;
+  font-size: 12px;
+  list-style: none;
+}
+
+.spisok-nomenklatury li {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--kant);
+}
+
+.spisok-nomenklatury li:last-child {
+  border-bottom: 0;
+}
+
+.spisok-imya {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--grafit-70);
+}
+
+/* ── Кнопки ─────────────────────────────────────────────── */
+
+.knopka {
+  padding: 9px 16px;
+  border: 1px solid var(--grafit);
+  border-radius: 8px;
+  background: var(--lime);
+  color: var(--grafit);
+  font: 600 13px/1 var(--body);
+  cursor: pointer;
+  transition: transform 120ms ease, box-shadow 120ms ease;
+}
+
+.knopka:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 0 var(--grafit);
+}
+
+.knopka:disabled {
+  background: var(--stan);
+  border-color: var(--kant);
+  color: var(--grafit-40);
+  cursor: default;
+}
+
+.knopka-glavnaya {
+  align-self: flex-start;
+}
+
+/* ── Фильтры ────────────────────────────────────────────── */
+
+.filtry {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-bottom: 12px;
+}
+
+.poisk,
+.vybor {
+  height: 34px;
+  padding: 0 11px;
+  border: 1px solid var(--kant);
+  border-radius: 8px;
+  background: var(--polotno);
+  color: var(--grafit);
+  font: 400 13px/1 var(--body);
+}
+
+.poisk {
+  flex: 1;
+  min-width: 180px;
+}
+
+.poisk::placeholder {
+  color: var(--grafit-40);
+}
+
+.schetchik {
+  font: 400 12px/1 var(--mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--grafit-40);
+}
+
+/* ── Таблица ────────────────────────────────────────────── */
+
+.tablica-obolochka {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.tablica {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  border: 1px solid var(--kant);
+  border-radius: 10px 10px 0 0;
+  background: var(--polotno);
+}
+
+.tablica-shapka {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: grid;
+  background: var(--polotno);
+  border-bottom: 1px solid var(--kant);
+}
+
+.tablica-shapka > div {
+  padding: 9px 12px;
+  font: 500 10px/1 var(--body);
+  letter-spacing: 0.08em;
+  color: var(--grafit-40);
+  text-transform: uppercase;
+}
+
+.tablica-telo {
+  position: relative;
+}
+
+.stroka {
+  position: absolute;
+  left: 0;
+  right: 0;
+  display: grid;
+  align-items: center;
+  border-bottom: 1px solid rgb(223 225 217 / 0.55);
+}
+
+.stroka:hover {
+  background: var(--stan);
+}
+
+.stroka > div {
+  overflow: hidden;
+  padding: 0 12px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.mayak {
+  height: 1px;
+}
+
+.tablica-podval {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 12px;
+  border: 1px solid var(--kant);
+  border-top: 0;
+  border-radius: 0 0 10px 10px;
+  background: var(--polotno);
+}
+
+.tablica-podval .knopka {
+  margin-left: auto;
+}
+
+.chislo {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.kod {
+  font-family: var(--mono);
+  color: var(--grafit-70);
+}
+
+.pusto {
+  padding: 40px 12px;
+  text-align: center;
+  color: var(--grafit-40);
+}
+
+/* Единица измерения — метка материала: кг весовой, шт./м штучный. */
+.ed {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font: 500 11px/1.5 var(--mono);
+}
+
+.ed[data-ed='кг'] {
+  background: rgb(168 91 42 / 0.14);
+  color: var(--med);
+}
+
+.ed[data-ed='шт./м'] {
+  background: rgb(26 109 176 / 0.12);
+  color: var(--alum);
+}
+
+.zagruzka {
+  padding: 60px 24px;
+  color: var(--grafit-40);
+}
+
+/* ── Планшет ────────────────────────────────────────────── */
+
+@media (max-width: 1100px) {
+  :root {
+    --relse-w: 170px;
+  }
+
+  .pole {
+    padding: 18px 16px 0;
+  }
+
+  .kotirovki {
+    gap: 14px;
+  }
+}
+
+/* ── Телефон ────────────────────────────────────────────── */
+
+@media (max-width: 760px) {
+  .canvas {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+
+  .relse {
+    flex-direction: row;
+    gap: 6px;
+    overflow-x: auto;
+    padding: 10px 12px;
+    border-right: 0;
+    border-bottom: 1px solid var(--kant);
+    scrollbar-width: none;
+  }
+
+  .relse::-webkit-scrollbar {
+    display: none;
+  }
+
+  .relse-zagolovok,
+  .kotirovki {
+    display: none;
+  }
+
+  .pole-zagolovok {
+    font-size: 24px;
+  }
+
+  .geroy {
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .filtry {
+    flex-direction: column;
+  }
+
+  .poisk,
+  .vybor {
+    width: 100%;
+  }
+
+  /* Строка таблицы становится карточкой: колонки не помещаются в 390px. */
+  .tablica[data-karty] .stroka {
+    display: block;
+    padding: 10px 12px;
+  }
+
+  .tablica[data-karty] .stroka > div {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    padding: 2px 0;
+    white-space: normal;
+  }
+
+  /* Название — главное в карточке: идёт блоком под меткой и режется двумя
+     строками, иначе карточки разъезжаются по высоте. */
+  .tablica[data-karty] .stroka > div[data-metka='Номенклатура'] {
+    display: block;
+    margin-bottom: 4px;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    font-weight: 500;
+  }
+
+  .tablica[data-karty] .stroka > div[data-metka='Номенклатура']::before {
+    display: block;
+    margin-bottom: 2px;
+  }
+
+  .tablica[data-karty] .stroka > div::before {
+    content: attr(data-metka);
+    flex: none;
+    font: 500 10px/1.6 var(--body);
+    letter-spacing: 0.06em;
+    color: var(--grafit-40);
+    text-transform: uppercase;
+  }
+
+  .tablica[data-karty] .stroka > div[data-vtoroy] {
+    display: none;
+  }
+
+  .tablica-podval {
+    flex-wrap: wrap;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ── Лендинг ────────────────────────────────────────────── */
+
+.lending {
+  min-height: 100%;
+  background: var(--stan);
+}
+
+.lending-shapka {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 28px;
+  background: var(--grafit);
+  color: var(--polotno);
+}
+
+.lending-shapka .knopka {
+  margin-left: auto;
+}
+
+/* Все секции лендинга сидят на одной сетке — левый край общий. */
+.lending-geroy {
+  max-width: 1100px;
+  padding: 72px 28px 56px;
+  margin: 0 auto;
+}
+
+.lending-zagolovok,
+.lending-lid {
+  max-width: 720px;
+}
+
+.lending-nadzagolovok {
+  margin: 0 0 14px;
+  font: 500 11px/1 var(--body);
+  letter-spacing: 0.14em;
+  color: var(--med);
+  text-transform: uppercase;
+}
+
+.lending-zagolovok {
+  margin: 0;
+  font: 700 clamp(34px, 6.4vw, 68px) / 1.02 var(--display);
+  letter-spacing: -0.03em;
+}
+
+.lending-lid {
+  max-width: 560px;
+  margin: 22px 0 30px;
+  font-size: 16px;
+  line-height: 1.55;
+  color: var(--grafit-70);
+}
+
+.knopka-krupnaya {
+  padding: 13px 24px;
+  font-size: 14px;
+}
+
+/* Цифры лендинга — из тех же данных, что и панель, не из презентации. */
+.lending-cifry {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1px;
+  max-width: 1044px; /* 1100 минус горизонтальные отступы секций */
+  margin: 0 auto 72px;
+  background: var(--kant);
+  border: 1px solid var(--kant);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.lending-cifra {
+  padding: 24px 22px;
+  background: var(--polotno);
+}
+
+.lending-cifra-znachenie {
+  font: 500 30px/1 var(--mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.03em;
+}
+
+.lending-cifra-podpis {
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--grafit-40);
+}
+
+.lending-obertka {
+  max-width: 1100px;
+  padding: 0 28px;
+  margin: 0 auto;
+}
+
+.lending-etapy {
+  max-width: 1100px;
+  padding: 0 28px 72px;
+  margin: 0 auto;
+}
+
+.lending-podzagolovok {
+  margin: 0 0 28px;
+  font: 700 24px/1.1 var(--display);
+  letter-spacing: -0.02em;
+}
+
+/* Та же медная шина, что в панели: этапы сидят на ней контактами. */
+.lending-shina {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 22px;
+  margin: 0;
+  padding: 28px 0 0;
+  list-style: none;
+}
+
+.lending-shina::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--shina-h);
+  border-radius: 3px;
+  background: linear-gradient(180deg, var(--med-svet) 0%, var(--med) 55%, #7d4320 100%);
+}
+
+.lending-etap {
+  position: relative;
+  padding-top: 20px;
+}
+
+.lending-etap::before {
+  content: '';
+  position: absolute;
+  top: -28px;
+  left: 14px;
+  width: 2px;
+  height: 34px;
+  background: var(--med);
+}
+
+.lending-etap-nomer {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--grafit);
+  color: var(--lime);
+  font: 500 13px/1 var(--mono);
+}
+
+.lending-etap-imya {
+  margin: 12px 0 6px;
+  font: 600 16px/1.2 var(--body);
+}
+
+.lending-etap-opisanie {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--grafit-70);
+}
+
+.lending-podval {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 26px 28px;
+  background: var(--grafit);
+  color: var(--grafit-40);
+  font-size: 13px;
+}
+
+.lending-podval .knopka {
+  margin-left: auto;
+}
+
+@media (max-width: 760px) {
+  .lending-geroy {
+    padding: 44px 18px 36px;
+  }
+
+  .lending-etapy {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+
+  .lending-cifry {
+    margin-left: 18px;
+    margin-right: 18px;
+  }
+
+  .lending-shapka,
+  .lending-podval {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+
+  .lending-etap::before {
+    display: none;
+  }
+}
