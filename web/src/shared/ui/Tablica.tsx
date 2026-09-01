@@ -46,9 +46,9 @@ export function Tablica<T>({
   pokazatEscho,
 }: Props<T>) {
   const uzkiy = useUzkiy();
-  // В карточном режиме название занимает до двух строк — высота считана под него
-  // с запасом, чтобы нижняя строка не упиралась в разделитель карточек.
-  const rowH = uzkiy ? 152 : 34;
+  // В карточном режиме название занимает до трёх строк — высота считана под этот
+  // максимум с запасом, чтобы нижняя строка не упиралась в разделитель карточек.
+  const rowH = uzkiy ? 174 : 34;
   const [scroll, setScroll] = useState(0);
   const [vysota, setVysota] = useState(600);
   const mayak = useRef<HTMLDivElement>(null);

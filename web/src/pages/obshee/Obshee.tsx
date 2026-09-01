@@ -112,22 +112,22 @@ function PanelCen({ ceny }: { ceny: Ceny }) {
       <div className="tablica tablica-prostaya">
         <div className="tablica-shapka" style={{ gridTemplateColumns: SETKA_CEN }}>
           <div>Материал</div>
-          <div>Поставщик</div>
+          <div data-kol="supplier">Поставщик</div>
           <div>Ед.</div>
           <div>Цена</div>
-          <div>Диапазон</div>
+          <div data-kol="diapazon">Диапазон</div>
         </div>
         {materialy.map((m) => (
           <div className="stroka stroka-potoke" key={m.name + m.supplier} style={{ gridTemplateColumns: SETKA_CEN }}>
             <div>{m.name}</div>
-            <div className="net">{m.supplier || '—'}</div>
+            <div className="net" data-kol="supplier">{m.supplier || '—'}</div>
             <div>
               <span className="ed" data-ed={m.unit}>
                 {m.unit || '—'}
               </span>
             </div>
             <div className="chislo">{cenaTekst(m.cena)}</div>
-            <div className="net">{m.diapazon || '—'}</div>
+            <div className="net" data-kol="diapazon">{m.diapazon || '—'}</div>
           </div>
         ))}
       </div>

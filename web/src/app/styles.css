@@ -797,13 +797,14 @@ body {
 
   /* Название — главное в карточке: идёт блоком под меткой и режется двумя
      строками, иначе карточки разъезжаются по высоте. */
+  /* Название переносится обычным потоком: -webkit-line-clamp тут не работает,
+     Chrome схлопывает display в flow-root и кламп игнорируется. Вместо обрезки
+     даём место под три строки — высота карточки посчитана под этот максимум. */
   .tablica[data-karty] .stroka > div[data-metka='Номенклатура'] {
     display: block;
     margin-bottom: 4px;
     overflow: hidden;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
+    text-overflow: clip;
     font-weight: 500;
   }
 
@@ -1071,11 +1072,23 @@ body {
   color: var(--grafit-40);
 }
 
-/* Таблица без виртуализации: списки здесь короткие. */
+/* Таблица без виртуализации: списки здесь короткие.
+   Горизонтальный скролл обязателен — на узком экране широкая сетка иначе
+   вылезает из контейнера и накладывается на текст под таблицей. */
 .tablica-prostaya {
-  overflow: visible;
+  /* Растём по содержимому, а не тянемся флексом: иначе контейнер схлопывается
+     и overflow срезает строки. */
+  flex: none;
+  min-height: auto;
+  overflow-x: auto;
+  overflow-y: visible;
   border-radius: 10px;
   margin-bottom: 8px;
+}
+
+.tablica-prostaya .tablica-shapka,
+.tablica-prostaya .stroka {
+  min-width: max-content;
 }
 
 .stroka-potoke {
@@ -1246,4 +1259,31 @@ body {
 
 [data-metall='kurs'] {
   background: var(--grafit-40);
+}
+
+.kpi-edinica {
+  margin-left: 4px;
+  font-size: 13px;
+  color: var(--grafit-40);
+  white-space: nowrap; /* «₽/кг» не должно ломаться на две строки */
+}
+
+/* Плитка котировки: метка металла, число и единица в одну строку. */
+.kotirovki-plitki .kpi-znachenie {
+  flex-wrap: nowrap;
+  white-space: nowrap;
+}
+
+@media (max-width: 760px) {
+  /* На телефоне цена важнее поставщика и словесного диапазона:
+     второстепенные колонки убираем, чтобы главное влезало без скролла. */
+  .ceny .tablica-prostaya [data-kol] {
+    display: none;
+  }
+
+  .ceny .tablica-prostaya .tablica-shapka,
+  .ceny .tablica-prostaya .stroka {
+    min-width: 0;
+    grid-template-columns: minmax(0, 1fr) 62px 92px !important;
+  }
 }
