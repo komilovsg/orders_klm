@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 360" role="img"
+     aria-label="Панель закупок КЛМ: медная шина с четырьмя этапами — Общее, Заказ, План оплат, Тендер. 10 087 позиций, 371 заказ, 135 проектов.">
+  <title>Панель закупок КЛМ — реестр заявок становится планом оплат</title>
+  <defs>
+    <linearGradient id="med" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#C9743D"/>
+      <stop offset="55%" stop-color="#A85B2A"/>
+      <stop offset="100%" stop-color="#7D4320"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="360" rx="14" fill="#1A1D18"/>
+
+  <!-- Марка -->
+  <text x="64" y="72" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif"
+        font-size="26" font-weight="700" letter-spacing="1" fill="#F7F8F3">КЛМ</text>
+  <text x="142" y="72" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif"
+        font-size="20" font-weight="500" letter-spacing="2.4" fill="#878D80">ЗАКУПКИ</text>
+
+  <!-- Заголовок -->
+  <text x="64" y="150" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif"
+        font-size="54" font-weight="800" letter-spacing="-1.4" fill="#F7F8F3">Реестр заявок</text>
+  <text x="64" y="212" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif"
+        font-size="54" font-weight="800" letter-spacing="-1.4" fill="#F7F8F3">становится планом оплат</text>
+
+  <!-- Медная шина: изделие компании и одновременно навигация по этапам -->
+  <rect x="64" y="270" width="736" height="9" rx="4" fill="url(#med)"/>
+
+  <!-- Контакты-этапы -->
+  <g font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="22" font-weight="600">
+    <line x1="104" y1="279" x2="104" y2="298" stroke="#CAFF28" stroke-width="3"/>
+    <circle cx="104" cy="302" r="9" fill="#CAFF28"/>
+    <text x="86" y="342" font-family="ui-sans-serif, system-ui, sans-serif" font-size="22"
+          font-weight="600" fill="#F7F8F3">Общее</text>
+
+    <line x1="290" y1="279" x2="290" y2="298" stroke="#4A5044" stroke-width="3"/>
+    <circle cx="290" cy="302" r="9" fill="#4A5044"/>
+    <text x="266" y="342" font-family="ui-sans-serif, system-ui, sans-serif" font-size="22"
+          font-weight="600" fill="#878D80">Заказ</text>
+
+    <line x1="476" y1="279" x2="476" y2="298" stroke="#4A5044" stroke-width="3"/>
+    <circle cx="476" cy="302" r="9" fill="#4A5044"/>
+    <text x="424" y="342" font-family="ui-sans-serif, system-ui, sans-serif" font-size="22"
+          font-weight="600" fill="#878D80">План оплат</text>
+
+    <line x1="700" y1="279" x2="700" y2="298" stroke="#4A5044" stroke-width="3"/>
+    <circle cx="700" cy="302" r="9" fill="#4A5044"/>
+    <text x="672" y="342" font-family="ui-sans-serif, system-ui, sans-serif" font-size="22"
+          font-weight="600" fill="#878D80">Тендер</text>
+  </g>
+
+  <!-- Реальные объёмы из реестра -->
+  <g font-family="ui-monospace, SFMono-Regular, Menlo, monospace">
+    <text x="1136" y="152" font-size="52" font-weight="600" fill="#F7F8F3" text-anchor="end">10 087</text>
+    <text x="1136" y="180" font-family="ui-sans-serif, system-ui, sans-serif" font-size="20"
+          fill="#878D80" text-anchor="end">позиций в работе</text>
+
+    <text x="1136" y="248" font-size="30" font-weight="600" fill="#C9743D" text-anchor="end">371</text>
+    <text x="1136" y="274" font-family="ui-sans-serif, system-ui, sans-serif" font-size="20"
+          fill="#878D80" text-anchor="end">заказов</text>
+
+    <text x="1136" y="320" font-size="30" font-weight="600" fill="#1A6DB0" text-anchor="end">135</text>
+    <text x="1136" y="346" font-family="ui-sans-serif, system-ui, sans-serif" font-size="20"
+          fill="#878D80" text-anchor="end">проектов</text>
+  </g>
+</svg>
