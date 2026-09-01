@@ -1,3 +1,5 @@
+import { chislo, type Kotirovki } from '@/shared/api/dannye';
+
 export type Etap = { nomer?: number; klyuch: string; nazvanie: string };
 
 export const ETAPY: Etap[] = [
@@ -8,22 +10,22 @@ export const ETAPY: Etap[] = [
   { nomer: 4, klyuch: 'tender', nazvanie: 'Тендер' },
 ];
 
-// Котировки Westmetall ещё не подключены. Показываем прочерк, а не выдуманное
-// число: цена металла — основание для закупки, врать тут нельзя.
-const METALLY = [
-  { kod: 'cu', imya: 'Cu' },
-  { kod: 'al', imya: 'Al' },
-  { kod: 'zn', imya: 'Zn' },
-];
-
 type Props = {
   aktivnyy: string;
   vybrat: (klyuch: string) => void;
+  kotirovki?: Kotirovki;
 };
 
 /** Сигнатурный элемент: медная шина — изделие компании. Этапы закупки сидят
  *  на ней контактами, активный замкнут. */
-export function Shina({ aktivnyy, vybrat }: Props) {
+export function Shina({ aktivnyy, vybrat, kotirovki }: Props) {
+  // Цены сырья из ЦЕНА СЫРЬЯ.xlsx — та же основа, по которой считается закупка.
+  const metally = [
+    { kod: 'cu', imya: 'Cu', cena: kotirovki?.cu },
+    { kod: 'al', imya: 'Al', cena: kotirovki?.al },
+    { kod: 'kurs', imya: '$', cena: kotirovki?.kurs },
+  ];
+
   return (
     <>
       <header className="shapka">
@@ -31,11 +33,17 @@ export function Shina({ aktivnyy, vybrat }: Props) {
           КЛМ <span>закупки</span>
         </button>
         <div className="kotirovki">
-          {METALLY.map((m) => (
-            <div className="kotirovka" key={m.kod} title="Источник котировок не подключён">
+          {metally.map((m) => (
+            <div
+              className="kotirovka"
+              key={m.kod}
+              title={m.cena ? 'Цена сырья из ЦЕНА СЫРЬЯ.xlsx' : 'Источник цен не подключён'}
+            >
               <i className="kotirovka-metall" data-metall={m.kod} />
               {m.imya}
-              <span className="kotirovka-delta">—</span>
+              <span className="kotirovka-cena">
+                {m.cena ? chislo(Math.round(m.cena)) : '—'}
+              </span>
             </div>
           ))}
         </div>

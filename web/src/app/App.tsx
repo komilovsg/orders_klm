@@ -3,6 +3,7 @@ import { Shina } from '@/widgets/shina/Shina';
 import { Dashboard } from '@/pages/dashboard/Dashboard';
 import { Obshee } from '@/pages/obshee/Obshee';
 import { Landing } from '@/pages/landing/Landing';
+import { Etap, ETAPY_NASTROYKI } from '@/pages/etapy/Etap';
 import { useDannye } from '@/shared/api/dannye';
 
 /** Роутинг по hash: два адреса, ради них тянуть react-router незачем.
@@ -21,6 +22,7 @@ export function App() {
   const [etap, setEtap] = useState('obzor');
   const { dannye, oshibka } = useDannye();
   const hash = useHash();
+  const nastroykaEtapa = ETAPY_NASTROYKI.find((n) => n.klyuch === etap);
 
   if (!hash.startsWith('#panel')) {
     return (
@@ -35,7 +37,7 @@ export function App() {
 
   return (
     <div className="app">
-      <Shina aktivnyy={etap} vybrat={setEtap} />
+      <Shina aktivnyy={etap} vybrat={setEtap} kotirovki={dannye?.ceny.kotirovki} />
 
       {oshibka && <div className="zagruzka">Данные не загрузились: {oshibka}</div>}
       {!oshibka && !dannye && <div className="zagruzka">Загружаем реестр…</div>}
@@ -44,11 +46,7 @@ export function App() {
         <div className="ekran" key={etap}>
           {etap === 'obzor' && <Dashboard dannye={dannye} pereyti={setEtap} />}
           {etap === 'obshee' && <Obshee dannye={dannye} />}
-          {etap !== 'obzor' && etap !== 'obshee' && (
-            <div className="zagruzka">
-              Этап переносится на React. Готовы «Обзор» и «Общее».
-            </div>
-          )}
+          {nastroykaEtapa && <Etap nastroyka={nastroykaEtapa} />}
         </div>
       )}
     </div>

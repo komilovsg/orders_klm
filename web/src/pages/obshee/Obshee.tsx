@@ -1,6 +1,13 @@
 import { useMemo, useState } from 'react';
 import { Tablica, type Kolonka } from '@/shared/ui/Tablica';
-import { chislo, useStranicy, type Dannye, type Pozicia } from '@/shared/api/dannye';
+import {
+  chislo,
+  useStranicy,
+  type Ceny,
+  type Dannye,
+  type Platelshchik,
+  type Pozicia,
+} from '@/shared/api/dannye';
 
 const PANELI = [
   { klyuch: 'postavshchiki', nazvanie: 'Поставщики' },
@@ -53,6 +60,136 @@ const KOLONKI_POSTAVSHCHIKI: Kolonka<string>[] = [
   { klyuch: 'imya', zagolovok: 'Поставщик', shirina: 'minmax(240px, 1fr)', yacheyka: (r) => r },
 ];
 
+const KOLONKI_PLATELSHCHIKI: Kolonka<Platelshchik>[] = [
+  {
+    klyuch: 'name',
+    zagolovok: 'Плательщик',
+    shirina: 'minmax(220px, 1.6fr)',
+    yacheyka: (r) => r.name,
+  },
+  {
+    klyuch: 'bank',
+    zagolovok: 'Банк',
+    shirina: 'minmax(120px, 1fr)',
+    yacheyka: (r) => r.bank || <span className="net">не указан</span>,
+  },
+  {
+    klyuch: 'updated',
+    zagolovok: 'Реквизиты от',
+    shirina: '130px',
+    yacheyka: (r) => <span className="kod">{r.updated}</span>,
+  },
+  {
+    klyuch: 'file',
+    zagolovok: 'Документ',
+    shirina: 'minmax(200px, 1.4fr)',
+    vtorostepennaya: true,
+    yacheyka: (r) => <span className="net">{r.file}</span>,
+  },
+];
+
+const cenaTekst = (v: number | string) =>
+  typeof v === 'number' ? `${chislo(Math.round(v))} ₽` : v;
+
+/** Цены закупки: действующие цены на материалы, итоги переговоров
+ *  и котировки сырья, от которых эти цены считаются. */
+function PanelCen({ ceny }: { ceny: Ceny }) {
+  const { kotirovki, materialy, peregovory } = ceny;
+  const razdely = [...new Set(peregovory.map((p) => p.razdel))];
+
+  return (
+    <div className="ceny">
+      <section className="kotirovki-plitki">
+        <PlitkaMetalla metall="cu" imya="Медь" znachenie={kotirovki.cu} edinica="₽/кг" />
+        <PlitkaMetalla metall="al" imya="Алюминий" znachenie={kotirovki.al} edinica="₽/кг" />
+        <PlitkaMetalla metall="zn" imya="Курс" znachenie={kotirovki.kurs} edinica="₽" />
+      </section>
+
+      <h2 className="vidzhet-zagolovok">Действующие цены на материалы</h2>
+      <p className="vidzhet-podpis">
+        {materialy.length} позиций · цена за единицу с НДС, последняя из истории
+      </p>
+      <div className="tablica tablica-prostaya">
+        <div className="tablica-shapka" style={{ gridTemplateColumns: SETKA_CEN }}>
+          <div>Материал</div>
+          <div>Поставщик</div>
+          <div>Ед.</div>
+          <div>Цена</div>
+          <div>Диапазон</div>
+        </div>
+        {materialy.map((m) => (
+          <div className="stroka stroka-potoke" key={m.name + m.supplier} style={{ gridTemplateColumns: SETKA_CEN }}>
+            <div>{m.name}</div>
+            <div className="net">{m.supplier || '—'}</div>
+            <div>
+              <span className="ed" data-ed={m.unit}>
+                {m.unit || '—'}
+              </span>
+            </div>
+            <div className="chislo">{cenaTekst(m.cena)}</div>
+            <div className="net">{m.diapazon || '—'}</div>
+          </div>
+        ))}
+      </div>
+
+      <h2 className="vidzhet-zagolovok vidzhet-zagolovok-vtoroy">Итоги переговоров</h2>
+      <p className="vidzhet-podpis">Что удалось изменить по цене и срокам</p>
+      {razdely.map((razdel) => (
+        <div className="razdel-peregovorov" key={razdel}>
+          <h3 className="razdel-imya">{razdel.toLowerCase()}</h3>
+          <ul className="peregovory">
+            {peregovory
+              .filter((p) => p.razdel === razdel)
+              .map((p, i) => (
+                <li className="peregovor" key={p.pozicia + i}>
+                  <span className="peregovor-pozicia">{p.pozicia}</span>
+                  {p.bylo && p.stalo ? (
+                    <span className="peregovor-cena">
+                      <s>{p.bylo}</s> → <b>{p.stalo}</b>
+                    </span>
+                  ) : (
+                    <span className="peregovor-cena net">без изменения цены</span>
+                  )}
+                  {p.skidka != null && (
+                    <span className="peregovor-skidka">−{Math.round(p.skidka * 100)}%</span>
+                  )}
+                  {p.primechanie && (
+                    <span className="peregovor-primechanie">{p.primechanie}</span>
+                  )}
+                </li>
+              ))}
+          </ul>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+const SETKA_CEN = 'minmax(190px, 2fr) minmax(130px, 1.3fr) 64px 110px minmax(120px, 1fr)';
+
+function PlitkaMetalla({
+  metall,
+  imya,
+  znachenie,
+  edinica,
+}: {
+  metall: string;
+  imya: string;
+  znachenie: number | null;
+  edinica: string;
+}) {
+  return (
+    <div className="kpi">
+      <div className="kpi-znachenie">
+        <i className="legenda-metka" data-metall={metall} />{' '}
+        {znachenie != null ? chislo(Math.round(znachenie * 100) / 100) : '—'}
+        <span className="kpi-edinica">{edinica}</span>
+      </div>
+      <div className="kpi-podpis">{imya}</div>
+    </div>
+  );
+}
+
 export function Obshee({ dannye }: { dannye: Dannye }) {
   const [panel, setPanel] = useState<Panel>('tmc');
   const [poisk, setPoisk] = useState('');
@@ -79,6 +216,7 @@ export function Obshee({ dannye }: { dannye: Dannye }) {
 
   const stranicyTmc = useStranicy(otfiltrovannye);
   const stranicyPostavshchikov = useStranicy(dannye.postavshchiki);
+  const stranicyPlatelshchikov = useStranicy(dannye.platelshchiki);
 
   return (
     <div className="canvas">
@@ -157,12 +295,19 @@ export function Obshee({ dannye }: { dannye: Dannye }) {
           />
         )}
 
-        {(panel === 'platelshchiki' || panel === 'ceny') && (
-          <div className="pusto">
-            Источник данных не подключён. Разберём{' '}
-            {panel === 'ceny' ? 'ЦЕНООБРАЗОВАНИЕ' : 'ПЛАТЕЛЬЩИКИ'}/ на следующем шаге.
-          </div>
+        {panel === 'platelshchiki' && (
+          <Tablica
+            stroki={stranicyPlatelshchikov.stroki}
+            kolonki={KOLONKI_PLATELSHCHIKI}
+            pustoTekst="Список плательщиков пуст."
+            vsego={stranicyPlatelshchikov.vsego}
+            escho={stranicyPlatelshchikov.escho}
+            gruzitsya={stranicyPlatelshchikov.gruzitsya}
+            pokazatEscho={stranicyPlatelshchikov.pokazatEscho}
+          />
         )}
+
+        {panel === 'ceny' && <PanelCen ceny={dannye.ceny} />}
       </main>
     </div>
   );

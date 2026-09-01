@@ -2,6 +2,6 @@
   "version": 2,
   "cleanUrls": true,
   "installCommand": "npm --prefix web install",
-  "buildCommand": "npm --prefix web run data && npm --prefix web run build",
+  "buildCommand": "npm --prefix web run build",
   "outputDirectory": "web/dist"
 }

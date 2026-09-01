@@ -1,9 +1,12 @@
 node_modules/
 web/dist/
-web/public/data/
+web/tsconfig.tsbuildinfo
 .playwright-mcp/
+
+# Скриншоты держим только те, что нужны README и карточке ссылки.
 *.png
 !assets/readme/*.png
+!web/public/og.png
 
 data/chrome-*profile*/
 data/*.sqlite
@@ -15,4 +18,3 @@ data/files/
 ~$*
 .env
 .DS_Store
-web/tsconfig.tsbuildinfo

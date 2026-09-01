@@ -17,10 +17,49 @@ export type Svodka = {
   source: { fileName: string; sheetName: string; sourceRows: number };
 };
 
+export type Platelshchik = {
+  name: string;
+  bank: string;
+  updated: string;
+  file: string;
+};
+
+export type Material = {
+  name: string;
+  supplier: string;
+  unit: string;
+  cena: number | string;
+  istoria: (number | string)[];
+  diapazon: string;
+};
+
+export type Peregovor = {
+  razdel: string;
+  pozicia: string;
+  bylo: string;
+  stalo: string;
+  skidka: number | null;
+  primechanie: string;
+};
+
+export type Kotirovki = {
+  kurs: number | null;
+  cu: number | null;
+  al: number | null;
+};
+
+export type Ceny = {
+  materialy: Material[];
+  peregovory: Peregovor[];
+  kotirovki: Kotirovki;
+};
+
 export type Dannye = {
   pozicii: Pozicia[];
   postavshchiki: string[];
   svodka: Svodka;
+  platelshchiki: Platelshchik[];
+  ceny: Ceny;
 };
 
 const zagruzit = async <T,>(file: string): Promise<T> => {
@@ -38,9 +77,11 @@ export function useDannye() {
       zagruzit<Pozicia[]>('items.json'),
       zagruzit<string[]>('suppliers.json'),
       zagruzit<Svodka>('stats.json'),
+      zagruzit<Platelshchik[]>('platelshchiki.json'),
+      zagruzit<Ceny>('ceny.json'),
     ])
-      .then(([pozicii, postavshchiki, svodka]) =>
-        setDannye({ pozicii, postavshchiki, svodka })
+      .then(([pozicii, postavshchiki, svodka, platelshchiki, ceny]) =>
+        setDannye({ pozicii, postavshchiki, svodka, platelshchiki, ceny })
       )
       .catch((e: Error) => setOshibka(e.message));
   }, []);
