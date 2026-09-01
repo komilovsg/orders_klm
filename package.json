@@ -4,7 +4,9 @@
   "private": true,
   "description": "Этап 1 веб-панели закупок КЛМ",
   "scripts": {
+    "dev": "node server/server.js",
     "start": "node server/server.js",
+    "build": "node -e \"console.log('Static app ready')\"",
     "test": "node --test tests/*.test.js",
     "backup": "node server/backup.js"
   },
