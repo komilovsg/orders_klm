@@ -37,7 +37,7 @@ export function App() {
 
   return (
     <div className="app">
-      <Shina aktivnyy={etap} vybrat={setEtap} kotirovki={dannye?.ceny.kotirovki} />
+      <Shina aktivnyy={etap} vybrat={setEtap} />
 
       {oshibka && <div className="zagruzka">Данные не загрузились: {oshibka}</div>}
       {!oshibka && !dannye && <div className="zagruzka">Загружаем реестр…</div>}

@@ -1,29 +1,26 @@
-import { chislo, type Kotirovki } from '@/shared/api/dannye';
-
 export type Etap = { nomer?: number; klyuch: string; nazvanie: string };
 
 export const ETAPY: Etap[] = [
   { klyuch: 'obzor', nazvanie: 'Обзор' },
   { nomer: 1, klyuch: 'obshee', nazvanie: 'Общее' },
   { nomer: 2, klyuch: 'zakaz', nazvanie: 'Заказ' },
-  { nomer: 3, klyuch: 'plan', nazvanie: 'План оплат' },
-  { nomer: 4, klyuch: 'tender', nazvanie: 'Тендер' },
+  { nomer: 3, klyuch: 'tender', nazvanie: 'Тендер' },
+  { nomer: 4, klyuch: 'logistika', nazvanie: 'Логистика' },
+  { nomer: 5, klyuch: 'plan', nazvanie: 'План оплат' },
 ];
 
 type Props = {
   aktivnyy: string;
   vybrat: (klyuch: string) => void;
-  kotirovki?: Kotirovki;
 };
 
 /** Сигнатурный элемент: медная шина — изделие компании. Этапы закупки сидят
  *  на ней контактами, активный замкнут. */
-export function Shina({ aktivnyy, vybrat, kotirovki }: Props) {
+export function Shina({ aktivnyy, vybrat }: Props) {
   // Цены сырья из ЦЕНА СЫРЬЯ.xlsx — та же основа, по которой считается закупка.
   const metally = [
-    { kod: 'cu', imya: 'Cu', cena: kotirovki?.cu },
-    { kod: 'al', imya: 'Al', cena: kotirovki?.al },
-    { kod: 'kurs', imya: '$', cena: kotirovki?.kurs },
+    { kod: 'cu', imya: 'Медь' },
+    { kod: 'al', imya: 'Алюминий' },
   ];
 
   return (
@@ -37,13 +34,10 @@ export function Shina({ aktivnyy, vybrat, kotirovki }: Props) {
             <div
               className="kotirovka"
               key={m.kod}
-              title={m.cena ? 'Цена сырья из ЦЕНА СЫРЬЯ.xlsx' : 'Источник цен не подключён'}
+              title={m.imya}
             >
               <i className="kotirovka-metall" data-metall={m.kod} />
               {m.imya}
-              <span className="kotirovka-cena">
-                {m.cena ? chislo(Math.round(m.cena)) : '—'}
-              </span>
             </div>
           ))}
         </div>
