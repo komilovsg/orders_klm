@@ -322,7 +322,7 @@ type ApprovedOrder = TenderSelection & {
   approvedAt: string; attachment?: Vlozhenie; sentToPlan?: boolean;
   orderNumber?: string; project?: string; warehouseReceived?: boolean; receiptDate?: string; updAttachment?: Vlozhenie;
 };
-type PlanInvoice = ApprovedOrder & { attachment: Vlozhenie; paid: number; payer?: string };
+type PlanInvoice = ApprovedOrder & { attachment: Vlozhenie; paid: number; payer?: string; urgent?: boolean; paymentDueDate?: string };
 
 const PLAN_TOPICS = [
   '01. Задолженность по отгруженным товарам',
@@ -336,6 +336,26 @@ const PLAN_TOPICS = [
 ] as const;
 
 const razdelIzImeni = (fileName: string) => Number(fileName.match(/^(0[1-8])\./)?.[1] ?? 0);
+
+function segodnyaIso() {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+}
+
+function prioritetScheta(invoice: PlanInvoice): 1 | 2 | 3 {
+  const due = new Date(`${invoice.paymentDueDate ?? invoice.approvedAt.slice(0, 10)}T12:00:00`);
+  const today = new Date(`${segodnyaIso()}T12:00:00`);
+  const days = Math.round((due.getTime() - today.getTime()) / 86_400_000);
+  if (days <= 0) return 1;
+  if (days <= 5) return 2;
+  return 3;
+}
+
+function normalizovatKompaniyu(value: string) {
+  return value.toLocaleUpperCase('ru')
+    .replace(/ООО|ПАО|ЗАО|АО|ИП/g, '')
+    .replace(/[^А-ЯЁA-Z0-9]/g, '');
+}
 
 const TENDER_ITEMS: TenderItem[] = [
   { name: 'Шина медная М1 Т 6×130', quantity: 1200, lastPrice: 1086 },
@@ -508,7 +528,8 @@ function PlanOplat() {
   const [reportDate, setReportDate] = useState(() => new Date());
   const [sources, setSources] = useState({ invoices: '', payments: '', balances: '' });
   const [importError, setImportError] = useState('');
-  const [filters, setFilters] = useState({ number: '', supplier: '', payer: '', balance: '', deadline: '', priority: '', order: '', invoice: '', launch: '', total: '', paid: '', due: '', arrival: '' });
+  const [filters, setFilters] = useState({ number: '', suppliers: [] as string[], payers: [] as string[], balance: '', priorities: [] as string[], orders: [] as string[], invoice: '', launch: '', total: '', paid: '', due: '', arrival: '' });
+  const [urgentSelection, setUrgentSelection] = useState<Set<string>>(() => new Set());
   useEffect(() => {
     const onAdded = () => setInvoices(read());
     window.addEventListener('plan-invoice-added', onAdded);
@@ -574,23 +595,22 @@ function PlanOplat() {
   };
   const grandTotal = activeInvoices.reduce((sum, invoice) => sum + invoice.total, 0);
   const grandPaid = activeInvoices.reduce((sum, invoice) => sum + invoice.paid, 0);
+  const priorityDue = (priority: 1 | 2 | 3) => activeInvoices.filter((invoice) => prioritetScheta(invoice) === priority).reduce((sum, invoice) => sum + invoice.total - invoice.paid, 0);
   const payers = ['ГЛАВПРОЕКТ', 'АЛБИМАКС-МЕТАЛЛ', 'ТОКОПРОВОД.РУ', 'МК ИНЖИНИРИНГ', 'ВР ЛОГИСТИК', 'ТРАНСПОРТНАЯ ЭКСПЕДИЦИЯ', 'НПК ТЕХНОПРОГРЕСС'];
   const unique = (values: (string | undefined)[]) => [...new Set(values.filter((value): value is string => Boolean(value)))].sort((a, b) => a.localeCompare(b, 'ru'));
   const supplierOptions = unique(activeInvoices.map((invoice) => invoice.supplier));
-  const payerOptions = unique(activeInvoices.map((invoice) => invoice.payer));
+  const payerOptions = unique(activeInvoices.map((invoice) => invoice.payer ?? 'Не определён'));
   const orderOptions = unique(activeInvoices.map((invoice) => invoice.orderNumber || invoice.project));
   const filteredInvoices = activeInvoices.filter((invoice, index) => {
     const launch = '100';
     const balance = '—';
-    const deadline = invoice.approvedAt.slice(0, 10);
     const due = invoice.total - invoice.paid;
     return (!filters.number || String(index + 1).includes(filters.number))
-      && (!filters.supplier || invoice.supplier === filters.supplier)
-      && (!filters.payer || invoice.payer === filters.payer)
+      && (!filters.suppliers.length || filters.suppliers.includes(invoice.supplier))
+      && (!filters.payers.length || filters.payers.includes(invoice.payer ?? 'Не определён'))
       && (!filters.balance || balance.includes(filters.balance))
-      && (!filters.deadline || deadline === filters.deadline)
-      && (!filters.priority || filters.priority === 'Обычный')
-      && (!filters.order || invoice.orderNumber === filters.order || invoice.project === filters.order)
+      && (!filters.priorities.length || filters.priorities.includes(String(prioritetScheta(invoice))))
+      && (!filters.orders.length || filters.orders.includes(invoice.orderNumber ?? '') || filters.orders.includes(invoice.project ?? ''))
       && (!filters.invoice || `${invoice.invoiceNumber} ${invoice.paymentPurpose}`.toLocaleLowerCase('ru').includes(filters.invoice.toLocaleLowerCase('ru')))
       && (!filters.launch || launch.includes(filters.launch))
       && (!filters.total || String(invoice.total).includes(filters.total.replace(/\s/g, '')))
@@ -598,16 +618,30 @@ function PlanOplat() {
       && (!filters.due || String(due).includes(filters.due.replace(/\s/g, '')))
       && (!filters.arrival || invoice.receiptDate === filters.arrival);
   });
-  const setFilter = (name: keyof typeof filters, value: string) => setFilters((current) => ({ ...current, [name]: value }));
+  const setFilter = (name: keyof typeof filters, value: string | string[]) => setFilters((current) => ({ ...current, [name]: value }));
+  const toggleUrgentSelection = (invoice: PlanInvoice) => setUrgentSelection((current) => {
+    const next = new Set(current);
+    if (next.has(invoice.attachment.id)) next.delete(invoice.attachment.id); else next.add(invoice.attachment.id);
+    return next;
+  });
+  const formUrgent = () => {
+    if (!urgentSelection.size) return;
+    const next = invoices.map((invoice) => urgentSelection.has(invoice.attachment.id) ? { ...invoice, urgent: true, paymentDueDate: segodnyaIso() } : invoice);
+    localStorage.setItem('klm-plan-invoices', JSON.stringify(next));
+    setInvoices(next);
+    setUrgentSelection(new Set());
+    setFilters((current) => ({ ...current, priorities: ['1'] }));
+    setOpenTopics(new Set(planTopics));
+  };
 
   return (
     <section>
       <div className="plan-obzor">
         <div className="plan-title"><span>Фактические счета</span><h2>План оплат</h2><p>Отчёт сформирован {reportDate.toLocaleDateString('ru-RU')}: к оплате {activeInvoices.length} счетов, разнесённых по разделам.</p></div>
         <div className="plan-prioritety">
-          <PlanPriority title="Приоритет 1" subtitle="на текущую дату" value={0} />
-          <PlanPriority title="Приоритет 2" subtitle="до 5 рабочих дней" value={0} />
-          <PlanPriority title="Приоритет 3" subtitle="до 30 рабочих дней" value={grandTotal - grandPaid} />
+          <PlanPriority title="Приоритет 1" subtitle="не позднее текущей даты" value={priorityDue(1)} />
+          <PlanPriority title="Приоритет 2" subtitle="от завтра до 5 дней" value={priorityDue(2)} />
+          <PlanPriority title="Приоритет 3" subtitle="6 дней и более" value={priorityDue(3)} />
           <button className="plan-obnovit" onClick={() => { setInvoices(read()); setReportDate(new Date()); }}>Обновить данные</button>
         </div>
         <div className="plan-obshie-itogi"><span>Общие итоги по плану</span><div><small>Сумма заказа</small><b>{chislo(grandTotal)} ₽</b></div><div><small>Оплачено</small><b>{chislo(grandPaid)} ₽</b></div><div><small>Сумма к оплате</small><b>{chislo(grandTotal - grandPaid)} ₽</b></div></div>
@@ -619,7 +653,11 @@ function PlanOplat() {
       </div>
       {importError && <p className="zagruzka-fayla-oshibka">{importError}</p>}
       <div className="plan-platelshchiki">{payers.map((payer) => {
-        const rows = activeInvoices.filter((invoice) => invoice.payer?.toUpperCase().includes(payer.split('-')[0]));
+        const payerKey = normalizovatKompaniyu(payer);
+        const rows = invoices.filter((invoice) => {
+          const invoicePayer = normalizovatKompaniyu(invoice.payer ?? '');
+          return invoicePayer === payerKey || invoicePayer.includes(payerKey) || (Boolean(invoicePayer) && payerKey.includes(invoicePayer));
+        });
         const total = rows.reduce((sum, invoice) => sum + invoice.total, 0);
         const paid = rows.reduce((sum, invoice) => sum + invoice.paid, 0);
         return <article key={payer}><h3>{payer}</h3><div><span>Счета</span><b>{chislo(total)} ₽</b></div><div><span>Оплачено</span><b>{chislo(paid)} ₽</b></div><div><span>К оплате</span><b>{chislo(total - paid)} ₽</b></div></article>;
@@ -628,16 +666,16 @@ function PlanOplat() {
     <div className="plan-razdely">
       <div className="plan-table-wrap">
       <div className="plan-shapka">
-        {['№ п/п', 'Наименование поставщика', 'Наименование плательщика', 'Сальдо на дату', 'Сформировать срок', 'Приоритет', '№ заказа / наименование проекта', 'Реквизиты счёта / назначение платежа', '% к запуску', 'Сумма заказа', 'Оплачено', 'Сумма к оплате', 'Дата прихода'].map((column) => <span key={column}>{column}</span>)}
+        {['№ п/п', 'Наименование поставщика', 'Наименование плательщика', 'Сальдо на дату', 'Срочное', 'Приоритет', '№ заказа / наименование проекта', 'Реквизиты счёта / назначение платежа', '% к запуску', 'Сумма заказа', 'Оплачено', 'Сумма к оплате', 'Дата прихода'].map((column) => <span key={column}>{column}</span>)}
       </div>
       <div className="plan-filtry" aria-label="Фильтры плана оплат">
         <input aria-label="Фильтр по номеру строки" value={filters.number} onChange={(event) => setFilter('number', event.target.value)} placeholder="№" />
-        <select aria-label="Фильтр по поставщику" value={filters.supplier} onChange={(event) => setFilter('supplier', event.target.value)}><option value="">Подбор</option>{supplierOptions.map((value) => <option key={value}>{value}</option>)}</select>
-        <select aria-label="Фильтр по плательщику" value={filters.payer} onChange={(event) => setFilter('payer', event.target.value)}><option value="">Подбор</option>{payerOptions.map((value) => <option key={value}>{value}</option>)}</select>
+        <MultiSelectFilter label="Поставщик" options={supplierOptions} values={filters.suppliers} onChange={(values) => setFilter('suppliers', values)} />
+        <MultiSelectFilter label="Плательщик" options={payerOptions} values={filters.payers} onChange={(values) => setFilter('payers', values)} />
         <input aria-label="Фильтр по сальдо" value={filters.balance} onChange={(event) => setFilter('balance', event.target.value)} placeholder="Сальдо" />
-        <input type="date" aria-label="Фильтр по сроку" value={filters.deadline} onChange={(event) => setFilter('deadline', event.target.value)} />
-        <select aria-label="Фильтр по приоритету" value={filters.priority} onChange={(event) => setFilter('priority', event.target.value)}><option value="">Подбор</option><option>Обычный</option></select>
-        <select aria-label="Фильтр по заказу или проекту" value={filters.order} onChange={(event) => setFilter('order', event.target.value)}><option value="">Подбор</option>{orderOptions.map((value) => <option key={value}>{value}</option>)}</select>
+        <button className="knopka plan-srok" aria-label="Сформировать срочный план" disabled={!urgentSelection.size} onClick={formUrgent}><span>СФОР<br />МИРО<br />ВАТЬ</span></button>
+        <MultiSelectFilter label="Приоритет" options={['1', '2', '3']} values={filters.priorities} onChange={(values) => setFilter('priorities', values)} />
+        <MultiSelectFilter label="Заказ или проект" options={orderOptions} values={filters.orders} onChange={(values) => setFilter('orders', values)} />
         <input aria-label="Фильтр по счёту или ТМЦ" value={filters.invoice} onChange={(event) => setFilter('invoice', event.target.value)} placeholder="Счёт или ТМЦ" />
         <input aria-label="Фильтр по проценту запуска" value={filters.launch} onChange={(event) => setFilter('launch', event.target.value)} placeholder="%" />
         <input aria-label="Фильтр по сумме заказа" inputMode="decimal" value={filters.total} onChange={(event) => setFilter('total', event.target.value)} placeholder="Сумма" />
@@ -646,7 +684,7 @@ function PlanOplat() {
         <input type="date" aria-label="Фильтр по дате прихода" value={filters.arrival} onChange={(event) => setFilter('arrival', event.target.value)} />
       </div>
       {planTopics.map((topic) => {
-        const rows = filteredInvoices.filter((invoice) => invoice.topic === topic);
+        const rows = filteredInvoices.filter((invoice) => invoice.topic === topic).sort((a, b) => prioritetScheta(a) - prioritetScheta(b));
         const total = rows.reduce((sum, invoice) => sum + invoice.total, 0);
         const paid = rows.reduce((sum, invoice) => sum + invoice.paid, 0);
         return (
@@ -657,8 +695,8 @@ function PlanOplat() {
               <b>{invoice.supplier}</b>
               <span>{invoice.payer || 'Не определён'}</span>
               <span>—</span>
-              <span>{new Date(invoice.approvedAt).toLocaleDateString('ru-RU')}</span>
-              <span>Обычный</span>
+              <span className="plan-srochno"><input type="checkbox" aria-label={`Отметить как срочный: ${invoice.invoiceNumber}`} checked={urgentSelection.has(invoice.attachment.id)} onChange={() => toggleUrgentSelection(invoice)} /></span>
+              <span>{prioritetScheta(invoice)}</span>
               <span>{invoice.orderNumber ? `№ ${invoice.orderNumber}` : !invoice.items?.length ? 'Без заказа' : 'Тендер'}<small>{invoice.project ?? (!invoice.items?.length ? 'Прямая загрузка счёта' : 'Утверждённый выбор')}</small></span>
               <span className="plan-vlozhenie"><b>{invoice.invoiceNumber}</b><button className="plan-tmc-link" onClick={() => otkrytSchet(invoice.attachment)}>{invoice.paymentPurpose || invoice.items?.[0]?.name || 'Открыть счёт'}</button><small>Счёт: {invoice.attachment.name}{invoice.updAttachment ? ` · УПД: ${invoice.updAttachment.name}` : ''}</small></span>
               <span>100%</span>
@@ -674,6 +712,32 @@ function PlanOplat() {
     </div>
     </section>
   );
+}
+
+function MultiSelectFilter({ label, options, values, onChange }: { label: string; options: string[]; values: string[]; onChange: (values: string[]) => void }) {
+  const [open, setOpen] = useState(false);
+  const [pending, setPending] = useState<string[]>([]);
+  const show = () => {
+    setPending(values.length ? values : options);
+    setOpen(true);
+  };
+  const toggle = (value: string) => setPending((current) => current.includes(value) ? current.filter((item) => item !== value) : [...current, value]);
+  const allSelected = options.length > 0 && pending.length === options.length;
+  const apply = () => {
+    onChange(allSelected ? [] : pending);
+    setOpen(false);
+  };
+  return <div className="excel-filter">
+    <button type="button" className="excel-filter-trigger" aria-label={`Фильтр: ${label}`} aria-expanded={open} onClick={show}>{values.length ? `Выбрано: ${values.length}` : 'Подбор'}<span>▼</span></button>
+    {open && <div className="excel-filter-menu">
+      <div className="excel-filter-list">
+        <label className="excel-filter-all"><input type="checkbox" checked={allSelected} onChange={() => setPending(allSelected ? [] : [...options])} />Выбрать всё</label>
+        {options.map((option) => <label key={option}><input type="checkbox" checked={pending.includes(option)} onChange={() => toggle(option)} /><span>{option}</span></label>)}
+        {!options.length && <p>Нет значений</p>}
+      </div>
+      <div className="excel-filter-actions"><button type="button" onClick={apply} disabled={!pending.length && Boolean(options.length)}>ОК</button><button type="button" onClick={() => setOpen(false)}>Отмена</button></div>
+    </div>}
+  </div>;
 }
 
 function PlanPriority({ title, subtitle, value }: { title: string; subtitle: string; value: number }) {

@@ -1850,7 +1850,9 @@ body {
 }
 
 .plan-table-wrap {
-  min-width: 1230px;
+  --plan-columns: minmax(36px, 36fr) minmax(108px, 108fr) minmax(112px, 112fr) minmax(76px, 76fr) minmax(43px, 43fr) minmax(58px, 58fr) minmax(170px, 170fr) minmax(180px, 180fr) minmax(56px, 56fr) minmax(98px, 98fr) minmax(86px, 86fr) minmax(98px, 98fr) minmax(56px, 56fr);
+  width: 100%;
+  min-width: 1177px;
 }
 
 .plan-shapka,
@@ -1858,10 +1860,14 @@ body {
 .plan-razdel-summary,
 .plan-scheta > div {
   display: grid;
-  grid-template-columns: 36px 80px 84px 76px 86px 58px 170px 180px 72px 98px 86px 98px 72px;
+  grid-template-columns: var(--plan-columns);
   align-items: center;
   gap: 0;
 }
+.plan-shapka > *,
+.plan-filtry > *,
+.plan-razdel-summary > *,
+.plan-scheta > div > * { box-sizing: border-box; min-width: 0; }
 
 .plan-shapka {
   padding: 0;
@@ -1880,7 +1886,7 @@ body {
   border-right: 1px solid var(--kant);
   overflow-wrap: anywhere;
 }
-.plan-shapka > span:last-child { border-right: 0; }
+.plan-shapka > span:last-child { border-right: 1px solid var(--kant); }
 
 .plan-filtry {
   padding: 8px 0;
@@ -1904,8 +1910,25 @@ body {
 
 .plan-filtry > span { color: var(--grafit-40); text-align: center; }
 .plan-filtry select { cursor: pointer; }
-.plan-srok { display: grid; place-items: center; padding: 4px !important; border-color: var(--lime) !important; background: var(--lime) !important; color: var(--grafit); text-transform: uppercase; }
-.plan-srok small { font-size: 7px; font-weight: 600; }
+.excel-filter { position: relative; min-width: 0; margin: 0 4px; }
+.excel-filter-trigger { display: flex; align-items: center; justify-content: space-between; gap: 4px; width: 100%; min-height: 29px; padding: 6px; border: 1px solid var(--kant); border-radius: 5px; background: #fff; color: var(--grafit); font: 500 9px/1.2 var(--body); cursor: pointer; }
+.excel-filter-trigger span { color: var(--grafit-40); font-size: 7px; }
+.excel-filter-menu { position: absolute; top: calc(100% + 4px); left: 0; z-index: 30; width: max(220px, 100%); padding: 8px; border: 1px solid var(--kant); border-radius: 8px; background: #fff; box-shadow: 0 12px 30px rgb(17 20 15 / .2); }
+.excel-filter-list { max-height: 250px; overflow-y: auto; border-bottom: 1px solid var(--kant); }
+.excel-filter-list label { display: flex; align-items: flex-start; gap: 8px; padding: 6px 4px; color: var(--grafit); font-size: 10px; cursor: pointer; }
+.excel-filter-list label:hover { background: var(--stan); }
+.excel-filter-list input { flex: none; width: 13px; height: 13px; margin: 0; accent-color: var(--grafit); }
+.excel-filter-list span { overflow-wrap: anywhere; }
+.excel-filter-all { position: sticky; top: 0; z-index: 1; border-bottom: 1px solid var(--kant); background: #fff; font-weight: 700; }
+.excel-filter-actions { display: flex; justify-content: flex-end; gap: 7px; padding-top: 8px; }
+.excel-filter-actions button { min-width: 58px; padding: 5px 9px; border: 1px solid var(--kant); background: #fff; color: var(--grafit); font: 600 9px/1 var(--body); cursor: pointer; }
+.excel-filter-actions button:first-child { border-color: #1672e8; }
+.excel-filter-actions button:disabled { cursor: not-allowed; opacity: .45; }
+.plan-filtry .plan-srok { justify-self: center; width: 40px; height: 38px; min-height: 38px; margin: 0; padding: 2px !important; border: 1px solid var(--grafit) !important; border-radius: 6px; background: var(--lime) !important; color: #050700; text-transform: uppercase; box-shadow: inset 0 0 0 1px rgb(255 255 255 / .35); }
+.plan-srok span { font: 900 8px/.78 var(--body); letter-spacing: -.02em; text-align: center; }
+.plan-srok:disabled { cursor: not-allowed; filter: grayscale(1); opacity: .45; }
+.plan-srochno { display: grid; place-items: center; }
+.plan-srochno input { width: 17px; height: 17px; margin: 0; accent-color: var(--lime); cursor: pointer; }
 
 .plan-razdel {
   border-top: 1px solid var(--grafit-70);
