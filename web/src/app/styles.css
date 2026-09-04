@@ -1850,7 +1850,7 @@ body {
 }
 
 .plan-table-wrap {
-  min-width: 1560px;
+  min-width: 1230px;
 }
 
 .plan-shapka,
@@ -1858,22 +1858,32 @@ body {
 .plan-razdel-summary,
 .plan-scheta > div {
   display: grid;
-  grid-template-columns: 48px 145px 145px 105px 115px 95px 190px 230px 85px 120px 110px 120px 105px;
+  grid-template-columns: 36px 80px 84px 76px 86px 58px 170px 180px 72px 98px 86px 98px 72px;
   align-items: center;
-  gap: 12px;
+  gap: 0;
 }
 
 .plan-shapka {
-  padding: 10px 14px;
+  padding: 0;
   background: var(--polotno);
   color: var(--grafit-40);
   font-size: 9px;
   letter-spacing: .04em;
   text-transform: uppercase;
 }
+.plan-shapka > span {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  min-height: 70px;
+  padding: 10px 8px;
+  border-right: 1px solid var(--kant);
+  overflow-wrap: anywhere;
+}
+.plan-shapka > span:last-child { border-right: 0; }
 
 .plan-filtry {
-  padding: 8px 14px;
+  padding: 8px 0;
   border-top: 1px solid var(--kant);
   background: var(--polotno);
   color: var(--grafit);
@@ -1883,7 +1893,8 @@ body {
 .plan-filtry input,
 .plan-filtry .knopka {
   min-width: 0;
-  width: 100%;
+  width: calc(100% - 8px);
+  margin: 0 4px;
   padding: 7px 6px;
   border: 1px solid var(--kant);
   border-radius: 5px;
@@ -1892,13 +1903,16 @@ body {
 }
 
 .plan-filtry > span { color: var(--grafit-40); text-align: center; }
+.plan-filtry select { cursor: pointer; }
+.plan-srok { display: grid; place-items: center; padding: 4px !important; border-color: var(--lime) !important; background: var(--lime) !important; color: var(--grafit); text-transform: uppercase; }
+.plan-srok small { font-size: 7px; font-weight: 600; }
 
 .plan-razdel {
   border-top: 1px solid var(--grafit-70);
 }
 
 .plan-razdel-summary {
-  padding: 12px 14px;
+  padding: 12px 0;
   font-size: 11px;
 }
 
@@ -1907,6 +1921,12 @@ body {
 .plan-summary-total { grid-column: 10; }
 .plan-summary-paid { grid-column: 11; }
 .plan-summary-due { grid-column: 12; }
+.plan-scheta > div > * {
+  min-width: 0;
+  padding: 9px 8px;
+  border-right: 1px solid rgb(255 255 255 / .08);
+  overflow-wrap: anywhere;
+}
 
 .plan-deystviya {
   display: flex;
@@ -1914,10 +1934,10 @@ body {
   margin-bottom: 10px;
 }
 
-.plan-obzor { display: grid; grid-template-columns: minmax(280px, 1.2fr) minmax(470px, 2fr) minmax(210px, .8fr); gap: 12px; margin-bottom: 14px; }
+.plan-obzor { display: grid; grid-template-columns: minmax(330px, 1.2fr) minmax(530px, 2fr) minmax(210px, .72fr); gap: 10px; margin-bottom: 14px; }
 .plan-title { padding: 6px 0; }
 .plan-title > span { color: var(--grafit-70); font-size: 9px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; }
-.plan-title h2 { margin: 8px 0 6px; font: 500 clamp(34px, 5vw, 58px)/.95 var(--display); letter-spacing: -.05em; text-transform: uppercase; }
+.plan-title h2 { margin: 8px 0 10px; font: 500 clamp(42px, 5vw, 58px)/.9 var(--display); letter-spacing: -.055em; text-transform: uppercase; }
 .plan-title p { max-width: 380px; margin: 0; font-size: 11px; }
 .plan-prioritety { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; }
 .plan-prioritety article { display: grid; align-content: start; padding: 11px; border: 1px solid #9abb19; border-radius: 10px; background: #f8fbe9; }
@@ -1932,7 +1952,7 @@ body {
 .plan-obshie-itogi small { font-size: 9px; text-transform: uppercase; }
 .plan-obshie-itogi b { font: 600 12px/1 var(--mono); }
 .plan-istochniki { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 10px; }
-.plan-istochniki article { padding: 12px; border: 1px solid var(--kant); border-radius: 10px; background: var(--polotno); }
+.plan-istochniki article { min-height: 82px; padding: 12px; border: 1px solid var(--kant); border-radius: 10px; background: var(--polotno); }
 .plan-istochniki h3 { margin: 0 0 8px; color: var(--grafit-70); font-size: 9px; letter-spacing: .08em; text-transform: uppercase; }
 .plan-istochniki article > div { display: flex; gap: 7px; }
 .plan-istochniki input { display: none; }
